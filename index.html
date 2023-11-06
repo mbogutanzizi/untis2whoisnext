@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+  <head>
+    <meta charset="utf-8"/>
+    <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/jquery.csv.js"></script>
+
+    
+    <script>
+      var data="";
+      var CSV=Array();
+      var classMap={};
+      var column=0;
+      
+      function readFile(file) {
+	  
+	  const reader = new FileReader();
+	  reader.addEventListener('load', (event) => {
+	      data = event.target.result;
+	      CSV=$.csv.toArrays(data,{separator:'\t'})
+	      populateKlassen(CSV,$("#klassen"))
+	  });
+	  reader.readAsText(file);
+      }
+      
+      function makeXML()
+      {
+	  var idStudent=1;
+	  var selectedClasses=$("#klassen").val();
+	  doc = document.implementation.createDocument("", "", null);
+	  var pi = doc.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
+	  doc.insertBefore(pi, doc.firstChild);
+
+	  var whosNext = doc.createElement("whosNext");
+	  whosNext.setAttribute("versionName", "0.8.6");
+	  whosNext.setAttribute("versionCode","63");
+	  whosNext.setAttribute("dbVersion","15");
+	  
+	  doc.append(whosNext);
+	  var students = doc.createElement("students");
+	  whosNext.append(students);
+
+	  var courses = doc.createElement("courses");
+	  whosNext.append(courses);
+
+	  for (i=0;i<selectedClasses.length;i++)
+	  {
+	      var course=doc.createElement("course");
+	      course.setAttribute("id",i+1);
+	      course.setAttribute("name",selectedClasses[i]);
+	      courses.append(course);
+
+	      for (j=1;j<CSV.length;j++)
+	      {
+		  if (CSV[j][column]==selectedClasses[i])
+		  {
+		      var student=doc.createElement("student");
+		      student.setAttribute ("id",idStudent);
+		      student.setAttribute ("lastName",CSV[j][1]);
+		      student.setAttribute ("firstName",CSV[j][2]);
+		      students.append(student);
+		      var member=doc.createElement("member");
+		      member.setAttribute("id",idStudent);
+		      idStudent++;
+		      course.append(member);
+		  }
+	      }
+	  }
+	  var serializer = new XMLSerializer();
+	  return serializer.serializeToString(doc);
+      }
+
+
+      function dlFile(xmltext)
+      {
+	  var filename = "whosNext.xml";
+	  var pom = document.createElement('a');
+	  var bb = new Blob([xmltext], {type: 'text/plain'});
+	  
+	  pom.setAttribute('href', window.URL.createObjectURL(bb));
+	  pom.setAttribute('download', filename);
+	  
+	  pom.dataset.downloadurl = ['text/plain', pom.download, pom.href].join(':');
+	  pom.draggable = true; 
+	  pom.classList.add('dragout');
+	  
+	  pom.click();
+      }
+      
+      function populateKlassen(csvdata,element)
+      {
+	 
+	  var header=csvdata[0];
+
+	  for (i=0; i< header.length;i++)
+	  {
+	      if (header[i]=="klasse.name")
+	      {column=i;}
+	  }
+	  console.log("Using column"+column+" as class field.");
+
+	  for (i=1;i<csvdata.length;i++)
+	  {
+	      classMap[csvdata[i][column]]=1;
+	  }
+	  var classes=Object.keys(classMap);
+	  classes.sort();
+	  //console.log(classMap);
+	  for(i=0;i<classes.length;i++)
+	  {
+	      element.append('<option>'+classes[i]+'</option>');
+	  }
+      }
+    </script>
+    
+    
+  </head>
+  
+  <body style="font-size:150%;">
+
+
+    Dieses Formular exportiert die gewählten Klassen in das <a href="https://play.google.com/store/apps/details?id=de.mphil.whosnext&hl=en&gl=US">Who's Next?!</a> format.<p>
+
+      Bitte aus dem WebUntis die CSV-Datei der Schüler exportieren (<b>Stammdaten</b> → <b>Schüler*innen</b>,  am besten <b>alle</b>) danach in der Liste unten die gewünschten Klassen auswählen und  "Export!" klicken.<p>
+
+      <div style="width:100%;border: solid 1px #00FF00;background-color:#CCFFCC;">
+	Hinweis: Die Daten werden <b> nur im Browser</b> verarbeitet, es werden keine Daten hochgeladen.
+	</div>
+    
+    <input type="file" id="file-selector"><p/>
+    Klassen:<br>
+    <select name="klassen" id="klassen" multiple size="12" style>
+    </select>
+    <p>
+      
+    <button disabled id="btnExport" >Export!</button>
+    
+<script>
+  const fileSelector = document.getElementById('file-selector');
+  fileSelector.addEventListener('change', (event) => {
+      const fileList = event.target.files;
+      readFile(fileList[0]);
+      
+  });
+
+  $( "#klassen" ).on( "change", function() {
+      
+      if($("#klassen").val().length>0)
+      {
+	   $("#btnExport").prop("disabled",false);
+      } else
+      {
+	   $("#btnExport").prop("disabled",true);
+      }
+  } );
+
+  $( "#btnExport" ).on( "click", function() {
+      dlFile(makeXML());
+  });
+  
+</script>
+
+  </body>
+  
+</html>
