@@ -121,19 +121,19 @@
 
     Dieses Formular exportiert die gewählten Klassen in das <a href="https://play.google.com/store/apps/details?id=de.mphil.whosnext&hl=en&gl=US">Who's Next?!</a> format.<p>
 
-      Bitte aus dem WebUntis die CSV-Datei der Schüler exportieren (<b>Stammdaten</b> → <b>Schüler*innen</b>,  am besten <b>alle</b>) danach in der Liste unten die gewünschten Klassen auswählen und  "Export!" klicken.<p>
+      Bitte aus dem WebUntis die CSV-Datei der Schüler exportieren (<b>Stammdaten</b> → <b>Schüler*innen</b>,  am besten <b>alle</b>) danach in der Liste unten die gewünschten Klassen (Mehrfachauswahl mit STRG möglich) auswählen und  "Export!" klicken.<p>
 
       <div style="width:100%;border: solid 1px #00FF00;background-color:#CCFFCC;">
 	Hinweis: Die Daten werden <b> nur im Browser</b> verarbeitet, es werden keine Daten hochgeladen.
 	</div>
     
-    <input type="file" id="file-selector"><p/>
+    <input type="file" id="file-selector" style="font-size:100%;"><p/>
     Klassen:<br>
-    <select name="klassen" id="klassen" multiple size="12" style>
+    <select style="font-size:120%;" name="klassen" id="klassen" multiple size="12" style>
     </select>
     <p>
       
-    <button disabled id="btnExport" >Export!</button>
+    <button style="font-size:100%;" disabled id="btnExport" >Export!</button>
     
 <script>
   const fileSelector = document.getElementById('file-selector');
